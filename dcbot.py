@@ -7,7 +7,7 @@ APIKEY = ''
 guild = ''
 
 def get_everything(keyword=''):
-    url = 'https://newsapi.org/v2/everything'
+    url = 'https://newsapi.org/v2/top-headlines'
 
     params = {
         'q': keyword,
@@ -16,7 +16,9 @@ def get_everything(keyword=''):
 
     src = requests.get(url, params=params)
 
-    article = src.json()['articles'][0]
+    articles = src.json()['articles']
+    i = random.randint(0, len(articles) - 1)
+    article = articles[i]
     response = f"**{ article['title'] }** \n{ article['description'] } \n{ article['url'] }"
 
     return response
@@ -40,7 +42,7 @@ async def on_ready():
 @bot.command(name='hi', help="Says hi dumbo...")
 async def greetings(ctx, name=''):
     print(f'hi command used by { ctx.message.author }')
-    if str(ctx.message.author) != 'TusharGoyal#4077':
+    if str(ctx.message.author) == 'jayant Vashisth#6685':
         response = f'I don\'t say Hi to dumb people like you! { ctx.message.author.mention }'
     else:
         response = f'Hello { ctx.message.author.mention }'
@@ -50,7 +52,12 @@ async def greetings(ctx, name=''):
 @bot.command(name='news', help="gets news")
 async def news(ctx, keyword=''):
     print(f'news command used by { ctx.message.author }')
-    response = get_everything(keyword)
+    if keyword == '':
+        response = 'You haven\'t entered a topic, thus showing top news for India.'
+        keyword = 'India'
+        response += f'\n { get_everything(keyword)} '
+    else:
+        response = get_everything(keyword)
     await ctx.send(response)
 
 bot.run(TOKEN)
