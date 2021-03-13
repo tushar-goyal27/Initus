@@ -10,7 +10,7 @@ import os
 import discord
 from discord.ext import commands
 
-csv_file = open('commandLog.csv', 'a')
+csv_file = open('commandLog.csv', 'a', newline="")
 csv_writer = csv.writer(csv_file)
 
 load_dotenv()
@@ -18,25 +18,7 @@ load_dotenv()
 GUILD = os.getenv('GUILD_NAME')
 TOKEN = os.getenv('DISCORD_TOKEN')
 APIKEY = os.getenv('NEWS_API')
-
-
-def get_everything(keyword=''):
-    url = 'https://newsapi.org/v2/top-headlines'
-
-    params = {
-        'q': keyword,
-        'apiKey': APIKEY
-    }
-
-    src = requests.get(url, params=params)
-
-    articles = src.json()['articles']
-    i = random.randint(0, len(articles) - 1)
-    article = articles[i]
-    response = f"**{ article['title'] }** \n{ article['description'] } \n{ article['url'] }"
-
-    return response
-
+CHANNEL = os.getenv('CHANNEL_ID')
 
 intents = discord.Intents.all()
 
@@ -52,11 +34,18 @@ async def on_ready():
     for member in guild.members:
         print(member.name)
 
+    for channel in guild.channels:
+        print(f'{ channel.name } { channel.id }')
 
+    channel = bot.get_channel(int(CHANNEL))    
+    await channel.send('The Bot is online')
+
+# hi command
 @bot.command(name='hi', help="Says hi dumbo...")
 async def greetings(ctx, name=''):
     print(f'hi command used by { ctx.message.author }')
-    csv_writer.writerow([str(datetime.now()), 'hi', ctx.message.author, 'None'])
+    csv_writer.writerow([str(date.today()), str(datetime.now().time()), 'hi', ctx.message.author, 'None'])
+
     if str(ctx.message.author) == 'jayant Vashisth#6685':
         response = f'I don\'t say Hi to dumb people like you! { ctx.message.author.mention }'
     else:
@@ -64,25 +53,49 @@ async def greetings(ctx, name=''):
 
     await ctx.send(response)
 
+# news command
 @bot.command(name='news', help="gets news")
 async def news(ctx, keyword=''):
+    response = ''
+
     print(f'news command used by { ctx.message.author }  for keyword { keyword }')
-    csv_writer.writerow([str(datetime.now()), 'news', ctx.message.author, keyword])
+    csv_writer.writerow([str(date.today()), str(datetime.now().time()), 'news', ctx.message.author, keyword])
+
     if keyword == '':
         response = 'You haven\'t entered a topic, thus showing top news for India.'
         keyword = 'India'
-        response += f'\n { get_everything(keyword)} '
+
+    url = 'https://newsapi.org/v2/top-headlines'
+
+    params = {
+        'q': keyword,
+        'apiKey': APIKEY
+    }
+
+    src = requests.get(url, params=params)
+    articles = src.json()['articles']
+
+    if len(articles) == 0:
+        url = 'https://newsapi.org/v2/everything'
+        src = requests.get(url, params=params)
+        articles = src.json()['articles']
+
+    if len(articles) == 0:
+        response += f'Sorry no news for keyword { keyword }'
     else:
-        response = get_everything(keyword)
-        
+        i = random.randint(0, len(articles) - 1)
+        article = articles[i]
+        response += f"**{ article['title'] }** \n{ article['description'] } \n{ article['url'] }"
+
     await ctx.send(response)
 
+# slang command
 @bot.command(name='slang', help='Type _slang <word> to get the meaning of the slang')
 async def urbandictionary(ctx, keyword=''):
     response = ''
 
     print(f'slang command used by { ctx.message.author } for keyword { keyword }')
-    csv_writer.writerow([str(datetime.now()), 'hi', ctx.message.author, keyword])
+    csv_writer.writerow([str(date.today()), str(datetime.now().time()), 'hi', ctx.message.author, keyword])
 
     if keyword == '':
         response = 'You haven\'t entered a word, so showing the meaning of dumb\n'
@@ -99,11 +112,14 @@ async def urbandictionary(ctx, keyword=''):
         meaning = div.find('div', class_='meaning').text
         example = div.find('div', class_='example').text
 
+    if len(meaning) > 1000:
+        meaning = meaning[:950]
+    if len(example) > 1000:
+        example = example[:950]
+
         response += f'**{ keyword }**\n{ meaning } \n\n**Example**: *{ example }*'
 
     await ctx.send(response)
-
-
 
 bot.run(TOKEN)
 csv_file.close()
