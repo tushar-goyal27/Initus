@@ -117,7 +117,7 @@ async def urbandictionary(ctx, keyword=''):
     if len(example) > 1000:
         example = example[:950]
 
-        response += f'**{ keyword }**\n{ meaning } \n\n**Example**: *{ example }*'
+    response += f'**{ keyword }**\n{ meaning } \n\n**Example**: *{ example }*'
 
     await ctx.send(response)
 
