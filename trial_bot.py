@@ -124,10 +124,10 @@ async def urbandictionary(ctx, keyword=''):
 
     embed = discord.Embed(
         title = keyword,
-        description = meaning + '\n\n**Example**: _' + example + '_',
+        description = f'{meaning}\n\n**Example**: _{example}_\n\n**Author:** {author}',
         colour = ctx.author.top_role.color
     )
-    embed.set_footer('**Author:** ' + author + '\n**Requested by:** ' + ctx.author)
+    embed.set_footer(text = 'Requested by: {ctx.author}', icon_url = ctx.author.avatar_url)
 
     await ctx.send(embed = embed)
 
