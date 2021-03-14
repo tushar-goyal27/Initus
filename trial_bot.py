@@ -37,7 +37,7 @@ async def on_ready():
     for channel in guild.channels:
         print(f'{ channel.name } { channel.id }')
 
-    channel = bot.get_channel(int(CHANNEL))    
+    channel = bot.get_channel(int(CHANNEL))
     await channel.send('The Bot is online')
 
 # hi command
@@ -113,13 +113,14 @@ async def urbandictionary(ctx, keyword=''):
         div = soup.find('div', class_='def-panel')
         meaning = div.find('div', class_='meaning').text
         example = div.find('div', class_='example').text
+        author = div.find('div', class_='contributor').text
 
     if len(meaning) > 1000:
         meaning = meaning[:950]
     if len(example) > 1000:
         example = example[:950]
 
-    response += f'**{ keyword }**\n{ meaning } \n\n**Example**: *{ example }*'
+    response += f'**{ keyword }**\n{ meaning } \n\n**Example**: *{ example }*\n**Author**: { author }'
 
     await ctx.send(response)
 
