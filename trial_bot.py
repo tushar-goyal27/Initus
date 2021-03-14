@@ -127,7 +127,7 @@ async def urbandictionary(ctx, keyword=''):
         description = f'{meaning}\n\n**Example**: _{example}_\n\n**Author:** {author}',
         colour = ctx.author.top_role.color
     )
-    embed.set_footer(text = 'Requested by: {ctx.author}', icon_url = ctx.author.avatar_url)
+    embed.set_footer(text = f'Requested by: {ctx.author}', icon_url = ctx.author.avatar_url)
 
     await ctx.send(embed = embed)
 
