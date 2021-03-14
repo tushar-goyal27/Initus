@@ -105,6 +105,7 @@ async def urbandictionary(ctx, keyword=''):
 
     if src.status_code == 404:
         response += 'That word doesn\'t even exist Smarty Pants!'
+        await ctx.send(response)
     else:
         soup = BeautifulSoup(src.text, 'lxml')
 
