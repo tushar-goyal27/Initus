@@ -120,9 +120,16 @@ async def urbandictionary(ctx, keyword=''):
     if len(example) > 1000:
         example = example[:950]
 
-    response += f'**{ keyword }**\n{ meaning } \n\n**Example**: *{ example }*\n**Author**: { author }'
+    # response += f'**{ keyword }**\n{ meaning } \n\n**Example**: *{ example }*\n**Author**: { author }'
 
-    await ctx.send(response)
+    embed = discord.Embed(
+        title = keyword,
+        description = meaning + '\n\n**Example**: _' + example + '_',
+        colour = ctx.author.top_role.color
+    )
+    embed.set_footer('**Author:** ' + author + '\n**Requested by:** ' + ctx.author)
+
+    await ctx.send(embed = embed)
 
 bot.run(TOKEN)
 csv_file.close()
