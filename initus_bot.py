@@ -120,8 +120,6 @@ async def urbandictionary(ctx, keyword=''):
     if len(example) > 1000:
         example = example[:950]
 
-    # response += f'**{ keyword }**\n{ meaning } \n\n**Example**: *{ example }*\n**Author**: { author }'
-
     embed = discord.Embed(
         title = keyword,
         description = f'{meaning}\n\n**Example**: _{example}_\n\n**Author:** {author}',
@@ -130,6 +128,76 @@ async def urbandictionary(ctx, keyword=''):
     embed.set_footer(text = f'Requested by: {ctx.author}\n', icon_url = ctx.author.avatar_url)
 
     await ctx.send(embed = embed)
+
+# imdb command
+@bot.command(name='imdb', help='Type _imdb "tv show or movie" to get the info of the movie or show')
+async def imdb(ctx, keyword=''):
+
+    print(f'imdb command used by { ctx.message.author } for keyword { keyword }')
+    csv_writer.writerow([str(date.today()), str(datetime.now().time()), 'imdb', ctx.message.author, keyword])
+
+
+    keyword = keyword.replace(" ", "+")
+    url = f"https://www.imdb.com/find?q={ keyword }"
+    source = requests.get(url, timeout=20)
+    soup = BeautifulSoup(source.text, 'lxml')
+    td = soup.find('td', class_='result_text')
+
+    if td == None:
+        response = f'No such movie or tv show as { keyword }'
+        await ctx.send(response)
+        return
+
+    ttl = td.a['href']
+
+    # Have reached the page of Title
+    url = f"https://www.imdb.com{ttl}"
+    source = requests.get(url, timeout=20)
+    soup = BeautifulSoup(source.text, 'lxml')
+
+    title = soup.find('div', class_='title_wrapper').h1.text.strip()
+    title = title.replace('(', ' (')
+
+    poster = soup.find('div', class_='poster')
+    poster_link = poster.find('img')['src']
+
+    subtext = soup.find('div', class_='subtext')
+
+    if subtext == None:
+        response = f'No such movie or tv show as { keyword }'
+        await ctx.send(response)
+        return
+
+    data = subtext.find_all('a')
+    genre = data[:-1]
+    genre = ''.join([f'{ i.text }  ' for i in genre])
+
+    release = data[-1].text.strip()
+    time = subtext.find('time')
+    if time:
+        runtime = subtext.find('time').text.strip()
+    else:
+        runtime = 'ND'
+
+
+    rating = soup.find('div', class_='ratingValue').text.strip()
+    synopsis = soup.find('div', class_='summary_text').text.strip()
+
+    slate = soup.find('div', class_='slate')
+    trailer = slate.find('a')['href']
+    trailer = f'https://www.imdb.com{ trailer }'
+
+    embed = discord.Embed(
+        title = title,
+        description = f'**Rating**: :star: { rating }\n\n**Genre**: { genre }\n\n**Release**: { release }\n\n**Runtime**: {runtime}\n\n**Synopsis**: { synopsis }\n\n**Trailer**: { trailer }\n\n',
+        colour = ctx.author.top_role.color
+    )
+
+    embed.set_thumbnail(url = poster_link)
+    embed.set_footer(text = f'Requested by: {ctx.author}\n', icon_url = ctx.author.avatar_url)
+
+    await ctx.send(embed = embed)
+
 
 bot.run(TOKEN)
 csv_file.close()
