@@ -95,7 +95,7 @@ async def urbandictionary(ctx, keyword=''):
     response = ''
 
     print(f'slang command used by { ctx.message.author } for keyword { keyword }')
-    csv_writer.writerow([str(date.today()), str(datetime.now().time()), 'hi', ctx.message.author, keyword])
+    csv_writer.writerow([str(date.today()), str(datetime.now().time()), 'slang', ctx.message.author, keyword])
 
     if keyword == '':
         response = 'You haven\'t entered a word, so showing the meaning of dumb\n'
@@ -127,7 +127,7 @@ async def urbandictionary(ctx, keyword=''):
         description = f'{meaning}\n\n**Example**: _{example}_\n\n**Author:** {author}',
         colour = ctx.author.top_role.color
     )
-    embed.set_footer(text = f'Requested by: {ctx.author}', icon_url = ctx.author.avatar_url)
+    embed.set_footer(text = f'Requested by: {ctx.author}\n', icon_url = ctx.author.avatar_url)
 
     await ctx.send(embed = embed)
 
