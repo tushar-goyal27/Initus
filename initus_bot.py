@@ -1,24 +1,29 @@
 import requests
 import random
+import string
 from bs4 import BeautifulSoup
 import csv
 from datetime import date, datetime
+import json
 
 from dotenv import load_dotenv
 import os
 
 import discord
 from discord.ext import commands
+from discord.ext.commands import cooldown, BucketType
 
-csv_file = open('commandLog.csv', 'a', newline="")
-csv_writer = csv.writer(csv_file)
+def de_emjofy(s):
+    printable = set(string.printable)
+    return ''.join(filter(lambda x: x in printable, str(s)))
 
 load_dotenv()
 
-GUILD = os.getenv('GUILD_NAME')
+GUILD_ID = os.getenv('GUILD_ID')
 TOKEN = os.getenv('DISCORD_TOKEN')
 APIKEY = os.getenv('NEWS_API')
 CHANNEL = os.getenv('CHANNEL_ID')
+COMMAND_LOG = os.getenv('COMMAND_LOG_ID')
 
 intents = discord.Intents.all()
 
@@ -26,7 +31,7 @@ bot = commands.Bot(command_prefix='_', intents = intents)
 
 @bot.event
 async def on_ready():
-    guild = discord.utils.find(lambda s: s.name == GUILD, bot.guilds)
+    guild = discord.utils.find(lambda s: s.id == int(GUILD_ID), bot.guilds)
 
     print(f'{bot.user} is connected\n')
 
@@ -38,18 +43,26 @@ async def on_ready():
         print(f'{ channel.name } { channel.id }')
 
     channel = bot.get_channel(int(CHANNEL))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f'_help'))
     await channel.send('The Bot is online')
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        # response = f"Slow it down bro! Try again in { error.retry_after:.2f }s."
+        response = "Slow it down bro! Try again in {:.2f}s.".format(error.retry_after)
+        await ctx.send(response)
 
 # hi command
 @bot.command(name='hi', help="Says hi dumbo...")
-async def greetings(ctx, name=''):
-    print(f'hi command used by { ctx.message.author }')
-    csv_writer.writerow([str(date.today()), str(datetime.now().time()), 'hi', ctx.message.author, 'None'])
+async def greetings(ctx):
+    channel = bot.get_channel(int(COMMAND_LOG))
+    await channel.send(f'hi command used by { de_emjofy(ctx.author) }')
 
-    if str(ctx.message.author) == 'jayant Vashisth#6685':
-        response = f'I don\'t say Hi to dumb people like you! { ctx.message.author.mention }'
+    if str(ctx.author) == 'jayant Vashisth#6685':
+        response = f'I don\'t say Hi to dumb people like you! { ctx.author.mention }'
     else:
-        response = f'Hello { ctx.message.author.mention }'
+        response = f'Hello { ctx.author.mention }'
 
     await ctx.send(response)
 
@@ -57,9 +70,10 @@ async def greetings(ctx, name=''):
 @bot.command(name='news', help="gets news")
 async def news(ctx, keyword=''):
     response = ''
+    print(f'news command used by { de_emjofy(ctx.author) }  for keyword { keyword }')
 
-    print(f'news command used by { ctx.message.author }  for keyword { keyword }')
-    csv_writer.writerow([str(date.today()), str(datetime.now().time()), 'news', ctx.message.author, keyword])
+    channel = bot.get_channel(int(COMMAND_LOG))
+    await channel.send(f'news command used by { de_emjofy(ctx.author) }  for keyword { keyword }')
 
     if keyword == '':
         response = 'You haven\'t entered a topic, thus showing top news for India.'
@@ -91,11 +105,13 @@ async def news(ctx, keyword=''):
 
 # slang command
 @bot.command(name='slang', help='Type _slang <word> to get the meaning of the slang')
+@commands.cooldown(1, 60, commands.BucketType.user)
 async def urbandictionary(ctx, keyword=''):
     response = ''
 
-    print(f'slang command used by { ctx.message.author } for keyword { keyword }')
-    csv_writer.writerow([str(date.today()), str(datetime.now().time()), 'slang', ctx.message.author, keyword])
+    print(f'slang command used by { de_emjofy(ctx.author) } for keyword { keyword } { ctx.guild.id }')
+    channel = bot.get_channel(int(COMMAND_LOG))
+    await channel.send(f'slang command used by { de_emjofy(ctx.author) }  for keyword { keyword }')
 
     if keyword == '':
         response = 'You haven\'t entered a word, so showing the meaning of dumb\n'
@@ -122,10 +138,10 @@ async def urbandictionary(ctx, keyword=''):
 
     embed = discord.Embed(
         title = keyword,
-        description = f'{meaning}\n\n**Example**: _{example}_\n\n**Author:** {author}',
+        description = f'{ meaning }\n\n**Example**: _{ example }_\n\n**Author:** { author }',
         colour = ctx.author.top_role.color
     )
-    embed.set_footer(text = f'Requested by: {ctx.author}\n', icon_url = ctx.author.avatar_url)
+    embed.set_footer(text = f'Requested by: { de_emjofy(ctx.author) }\n', icon_url = ctx.author.avatar_url)
 
     await ctx.send(embed = embed)
 
@@ -133,9 +149,9 @@ async def urbandictionary(ctx, keyword=''):
 @bot.command(name='imdb', help='Type _imdb "tv show or movie" to get the info of the movie or show')
 async def imdb(ctx, keyword=''):
 
-    print(f'imdb command used by { ctx.message.author } for keyword { keyword }')
-    csv_writer.writerow([str(date.today()), str(datetime.now().time()), 'imdb', ctx.message.author, keyword])
-
+    print(f'imdb command used by { de_emjofy(ctx.author) } for keyword { keyword }')
+    channel = bot.get_channel(int(COMMAND_LOG))
+    await channel.send(f'imdb command used by { de_emjofy(ctx.author) }  for keyword { keyword }')
 
     keyword = keyword.replace(" ", "+")
     url = f"https://www.imdb.com/find?q={ keyword }"
@@ -151,7 +167,7 @@ async def imdb(ctx, keyword=''):
     ttl = td.a['href']
 
     # Have reached the page of Title
-    url = f"https://www.imdb.com{ttl}"
+    url = f"https://www.imdb.com{ ttl }"
     source = requests.get(url, timeout=20)
     soup = BeautifulSoup(source.text, 'lxml')
 
@@ -194,10 +210,36 @@ async def imdb(ctx, keyword=''):
     )
 
     embed.set_thumbnail(url = poster_link)
-    embed.set_footer(text = f'Requested by: {ctx.author}\n', icon_url = ctx.author.avatar_url)
+    embed.set_footer(text = f'Requested by: { de_emjofy(ctx.author) }\n', icon_url = ctx.author.avatar_url)
 
     await ctx.send(embed = embed)
 
+# link command
+@bot.command(name='link', help='Type _link "SubjectCode Day" Eg: _link "DC1MON"', aliases=['LINK', 'Link'])
+async def link(ctx, keyword=''):
+
+    channel = bot.get_channel(int(COMMAND_LOG))
+    await channel.send(f'link command used by { de_emjofy(ctx.author) }  for keyword { keyword }')
+
+    with open("links.json") as links_json:
+        link_dict = json.load(links_json)
+        if ctx.guild.id == int(GUILD_ID):
+            keyword = keyword.upper()
+            if keyword in link_dict:
+                response = link_dict[keyword]
+                await ctx.send(response)
+            else:
+                response = 'No subject like this!\n\n**Available Subjects**\n'
+                for key in link_dict.keys():
+                    response += f'\n> { key }'
+                embed = discord.Embed(
+                    description = response,
+                    colour = ctx.author.top_role.color
+                )
+                embed.set_footer(text = f'Requested by: { de_emjofy(ctx.author) }\n', icon_url = ctx.author.avatar_url)
+                await ctx.send(embed = embed)
+        else:
+            response = 'You don\'t have permission to use this command on this server!'
+            await ctx.send(response)
 
 bot.run(TOKEN)
-csv_file.close()
