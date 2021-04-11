@@ -13,7 +13,9 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import cooldown, BucketType
 
-def de_emjofy(s):
+from mal import MAL
+
+def de_emojify(s):
     printable = set(string.printable)
     return ''.join(filter(lambda x: x in printable, str(s)))
 
@@ -24,23 +26,18 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 APIKEY = os.getenv('NEWS_API')
 CHANNEL = os.getenv('CHANNEL_ID')
 COMMAND_LOG = os.getenv('COMMAND_LOG_ID')
+CHILL_LOUNGE = os.getenv('CHILL_LOUNGE')
 
 intents = discord.Intents.all()
 
 bot = commands.Bot(command_prefix='_', intents = intents)
+bot.add_cog(MAL(bot, COMMAND_LOG, CHILL_LOUNGE))
 
 @bot.event
 async def on_ready():
     guild = discord.utils.find(lambda s: s.id == int(GUILD_ID), bot.guilds)
 
     print(f'{bot.user} is connected\n')
-
-    print('Server members:')
-    for member in guild.members:
-        print(member.name)
-
-    for channel in guild.channels:
-        print(f'{ channel.name } { channel.id }')
 
     channel = bot.get_channel(int(CHANNEL))
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f'_help'))
@@ -49,15 +46,16 @@ async def on_ready():
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
-        # response = f"Slow it down bro! Try again in { error.retry_after:.2f }s."
-        response = "Slow it down bro! Try again in {:.2f}s.".format(error.retry_after)
-        await ctx.send(response)
+        response = f"Slow it down bro! Try again in { int(error.retry_after) }s."
+        await ctx.reply(response)
+    else:
+        raise error
 
 # hi command
 @bot.command(name='hi', help="Says hi dumbo...")
 async def greetings(ctx):
     channel = bot.get_channel(int(COMMAND_LOG))
-    await channel.send(f'hi command used by { de_emjofy(ctx.author) }')
+    await channel.send(f'hi command used by { de_emojify(ctx.author) } in { ctx.channel } in { ctx.channel }')
 
     if str(ctx.author) == 'jayant Vashisth#6685':
         response = f'I don\'t say Hi to dumb people like you! { ctx.author.mention }'
@@ -69,11 +67,10 @@ async def greetings(ctx):
 # news command
 @bot.command(name='news', help="gets news")
 async def news(ctx, keyword=''):
-    response = ''
-    print(f'news command used by { de_emjofy(ctx.author) }  for keyword { keyword }')
-
     channel = bot.get_channel(int(COMMAND_LOG))
-    await channel.send(f'news command used by { de_emjofy(ctx.author) }  for keyword { keyword }')
+    await channel.send(f'news command used by { de_emojify(ctx.author) }  for keyword { keyword } in { ctx.channel }')
+
+    response = ''
 
     if keyword == '':
         response = 'You haven\'t entered a topic, thus showing top news for India.'
@@ -107,11 +104,8 @@ async def news(ctx, keyword=''):
 @bot.command(name='slang', help='Type _slang <word> to get the meaning of the slang')
 @commands.cooldown(1, 60, commands.BucketType.user)
 async def urbandictionary(ctx, keyword=''):
-    response = ''
-
-    print(f'slang command used by { de_emjofy(ctx.author) } for keyword { keyword } { ctx.guild.id }')
     channel = bot.get_channel(int(COMMAND_LOG))
-    await channel.send(f'slang command used by { de_emjofy(ctx.author) }  for keyword { keyword }')
+    await channel.send(f'slang command used by { de_emojify(ctx.author) }  for keyword { keyword } in { ctx.channel }')
 
     if keyword == '':
         response = 'You haven\'t entered a word, so showing the meaning of dumb\n'
@@ -120,8 +114,8 @@ async def urbandictionary(ctx, keyword=''):
     src = requests.get(f'https://www.urbandictionary.com/define.php?term={ keyword }')
 
     if src.status_code == 404:
-        response += 'That word doesn\'t even exist Smarty Pants!'
-        await ctx.send(response)
+        response = 'That word doesn\'t even exist Smarty Pants!'
+        await ctx.reply(response)
         return
     else:
         soup = BeautifulSoup(src.text, 'lxml')
@@ -141,17 +135,16 @@ async def urbandictionary(ctx, keyword=''):
         description = f'{ meaning }\n\n**Example**: _{ example }_\n\n**Author:** { author }',
         colour = ctx.author.top_role.color
     )
-    embed.set_footer(text = f'Requested by: { de_emjofy(ctx.author) }\n', icon_url = ctx.author.avatar_url)
+    embed.set_footer(text = f'Requested by: { de_emojify(ctx.author) }\n', icon_url = ctx.author.avatar_url)
+    embed.timestamp = datetime.utcnow()
 
     await ctx.send(embed = embed)
 
 # imdb command
 @bot.command(name='imdb', help='Type _imdb "tv show or movie" to get the info of the movie or show')
 async def imdb(ctx, keyword=''):
-
-    print(f'imdb command used by { de_emjofy(ctx.author) } for keyword { keyword }')
     channel = bot.get_channel(int(COMMAND_LOG))
-    await channel.send(f'imdb command used by { de_emjofy(ctx.author) }  for keyword { keyword }')
+    await channel.send(f'imdb command used by { de_emojify(ctx.author) }  for keyword { keyword } in { ctx.channel }')
 
     keyword = keyword.replace(" ", "+")
     url = f"https://www.imdb.com/find?q={ keyword }"
@@ -160,14 +153,14 @@ async def imdb(ctx, keyword=''):
     td = soup.find('td', class_='result_text')
 
     if td == None:
-        response = f'No such movie or tv show as { keyword }'
-        await ctx.send(response)
+        response = f'No such movie or tv show'
+        await ctx.reply(response)
         return
 
     ttl = td.a['href']
-
+    keyword = keyword.replace("+", " ")
     # Have reached the page of Title
-    url = f"https://www.imdb.com{ ttl }"
+    url = f"https://www.imdb.com{ttl}"
     source = requests.get(url, timeout=20)
     soup = BeautifulSoup(source.text, 'lxml')
 
@@ -181,12 +174,12 @@ async def imdb(ctx, keyword=''):
 
     if subtext == None:
         response = f'No such movie or tv show as { keyword }'
-        await ctx.send(response)
+        await ctx.reply(response)
         return
 
     data = subtext.find_all('a')
     genre = data[:-1]
-    genre = ''.join([f'{ i.text }  ' for i in genre])
+    genre = ', '.join([i.text for i in genre])
 
     release = data[-1].text.strip()
     time = subtext.find('time')
@@ -194,7 +187,6 @@ async def imdb(ctx, keyword=''):
         runtime = subtext.find('time').text.strip()
     else:
         runtime = 'ND'
-
 
     rating = soup.find('div', class_='ratingValue').text.strip()
     synopsis = soup.find('div', class_='summary_text').text.strip()
@@ -205,21 +197,27 @@ async def imdb(ctx, keyword=''):
 
     embed = discord.Embed(
         title = title,
-        description = f'**Rating**: :star: { rating }\n\n**Genre**: { genre }\n\n**Release**: { release }\n\n**Runtime**: {runtime}\n\n**Synopsis**: { synopsis }\n\n**Trailer**: { trailer }\n\n',
+        description = f"""**Rating**: :star: { rating }\n
+        **Genre**: { genre }\n
+        **Release**: { release }\n
+        **Runtime**: { runtime }\n
+        **Synopsis**: { synopsis }\n
+        **Trailer**: { trailer }\n
+        For more info click [here]({ url })""",
         colour = ctx.author.top_role.color
     )
 
     embed.set_thumbnail(url = poster_link)
-    embed.set_footer(text = f'Requested by: { de_emjofy(ctx.author) }\n', icon_url = ctx.author.avatar_url)
+    embed.set_footer(text = f'Requested by: { de_emojify(ctx.author) }\n', icon_url = ctx.author.avatar_url)
+    embed.timestamp = datetime.utcnow()
 
     await ctx.send(embed = embed)
 
-# link command
-@bot.command(name='link', help='Type _link "SubjectCode Day" Eg: _link "DC1MON"', aliases=['LINK', 'Link'])
+@bot.command(name='link', help='Type _link Subject', aliases=['LINK', 'Link'])
 async def link(ctx, keyword=''):
 
     channel = bot.get_channel(int(COMMAND_LOG))
-    await channel.send(f'link command used by { de_emjofy(ctx.author) }  for keyword { keyword }')
+    await channel.send(f'link command used by { de_emojify(ctx.author) }  for keyword { keyword } in { ctx.channel }')
 
     with open("links.json") as links_json:
         link_dict = json.load(links_json)
@@ -227,7 +225,7 @@ async def link(ctx, keyword=''):
             keyword = keyword.upper()
             if keyword in link_dict:
                 response = link_dict[keyword]
-                await ctx.send(response)
+                await ctx.reply(response)
             else:
                 response = 'No subject like this!\n\n**Available Subjects**\n'
                 for key in link_dict.keys():
@@ -236,10 +234,10 @@ async def link(ctx, keyword=''):
                     description = response,
                     colour = ctx.author.top_role.color
                 )
-                embed.set_footer(text = f'Requested by: { de_emjofy(ctx.author) }\n', icon_url = ctx.author.avatar_url)
+                embed.set_footer(text = f'Requested by: { de_emojify(ctx.author) }\n', icon_url = ctx.author.avatar_url)
                 await ctx.send(embed = embed)
         else:
             response = 'You don\'t have permission to use this command on this server!'
-            await ctx.send(response)
+            await ctx.reply(response)
 
 bot.run(TOKEN)
