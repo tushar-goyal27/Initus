@@ -11,12 +11,13 @@ class MAL(commands.Cog):
         self.bot = bot
         self.command_id = COMMAND_LOG
         self.chill_lounge = CHILL_LOUNGE
+        self.enable = True
 
     def de_emojify(self, s):
         printable = set(string.printable)
         return ''.join(filter(lambda x: x in printable, str(s)))
 
-    @commands.command(name = 'mal')
+    @commands.command(name = 'mal', help='_mal "name of the anime" to get the info about the anime', aliases=['anime', 'MAL', 'ANIME'])
     async def mal(self, ctx, keyword = ''):
         if ctx.channel.id == int(self.chill_lounge):
             response = 'You can\'t use this command on this channel :('
