@@ -17,6 +17,7 @@ from mal import MAL
 from imdb import IMDB
 from slang import SLANG
 from link import LINK
+from manga import MANGA
 
 def de_emojify(s):
     printable = set(string.printable)
@@ -37,6 +38,7 @@ bot = commands.Bot(command_prefix='_', intents = intents)
 bot.launch_time = datetime.utcnow()
 
 mal_obj = MAL(bot, COMMAND_LOG, CHILL_LOUNGE)
+manga_obj = MANGA(bot, COMMAND_LOG, CHILL_LOUNGE)
 imdb_obj = IMDB(bot, COMMAND_LOG)
 slang_obj = SLANG(bot, COMMAND_LOG)
 link_obj = LINK(bot, GUILD_ID)
@@ -46,6 +48,7 @@ bot.add_cog(mal_obj)
 bot.add_cog(imdb_obj)
 bot.add_cog(slang_obj)
 bot.add_cog(link_obj)
+bot.add_cog(manga_obj)
 
 @bot.event
 async def on_ready():
