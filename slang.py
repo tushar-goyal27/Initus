@@ -10,15 +10,14 @@ class SLANG(commands.Cog):
     def __init__(self, bot, COMMAND_LOG):
         self.bot = bot
         self.command_id = COMMAND_LOG
-        self.enable = True
 
     def de_emojify(self, s):
         printable = set(string.printable)
         return ''.join(filter(lambda x: x in printable, str(s)))
 
-    @commands.command(name='slang', help='Type _slang "word" to get the meaning of the slang', aliases=['SLANG'])
+    @commands.command(name='slang', brief='Gives the meaning of the slang from UrbanDictionary', case_insensitive=True)
     @commands.cooldown(1, 60, commands.BucketType.user)
-    async def urbandictionary(self, ctx, keyword=''):
+    async def urbandictionary(self, ctx, *, keyword=''):
         channel = self.bot.get_channel(int(self.command_id))
         await channel.send(f'slang command used by { self.de_emojify(ctx.author) }  for keyword { keyword } in { ctx.channel }')
 

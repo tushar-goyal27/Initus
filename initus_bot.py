@@ -17,7 +17,7 @@ from mal import MAL
 from imdb import IMDB
 from slang import SLANG
 from link import LINK
-from manga import MANGA
+from help import HELP
 
 def de_emojify(s):
     printable = set(string.printable)
@@ -31,35 +31,36 @@ APIKEY = os.getenv('NEWS_API')
 CHANNEL = os.getenv('CHANNEL_ID')
 COMMAND_LOG = os.getenv('COMMAND_LOG_ID')
 CHILL_LOUNGE = os.getenv('CHILL_LOUNGE')
+ERROR_LOG = os.getenv('ERROR_LOG')
 
 intents = discord.Intents.all()
 
-bot = commands.Bot(command_prefix='_', intents = intents)
+bot = commands.Bot(command_prefix='_', intents = intents, help_command=None)
 bot.launch_time = datetime.utcnow()
 
 mal_obj = MAL(bot, COMMAND_LOG, CHILL_LOUNGE)
-manga_obj = MANGA(bot, COMMAND_LOG, CHILL_LOUNGE)
 imdb_obj = IMDB(bot, COMMAND_LOG)
 slang_obj = SLANG(bot, COMMAND_LOG)
 link_obj = LINK(bot, GUILD_ID)
-
+help_obj = HELP(bot, COMMAND_LOG)
 
 bot.add_cog(mal_obj)
 bot.add_cog(imdb_obj)
 bot.add_cog(slang_obj)
 bot.add_cog(link_obj)
-bot.add_cog(manga_obj)
+bot.add_cog(help_obj)
 
 @bot.event
 async def on_ready():
-    guild = discord.utils.find(lambda s: s.id == int(GUILD_ID), bot.guilds)
-
     print(f'{bot.user} is connected\n')
+    print('Currently on Servers:')
+    for guild in bot.guilds:
+        print(guild.name)
 
     channel = bot.get_channel(int(CHANNEL))
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f'_help'))
     # await channel.send('The Bot is online')
-    await channel.send('Initus Test time')
+    # await channel.send('Initus Test time')
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -67,10 +68,13 @@ async def on_command_error(ctx, error):
         response = f"Slow it down bro! Try again in { int(error.retry_after) }s."
         await ctx.reply(response)
     else:
+        channel = bot.get_channel(int(ERROR_LOG))
+        await channel.send(error)
         raise error
 
+
 # hi command
-@bot.command(name='hi', help="Says hi dumbo...")
+@bot.command(name='hi', brief="Says hi dumbo...")
 async def greetings(ctx):
     channel = bot.get_channel(int(COMMAND_LOG))
     await channel.send(f'hi command used by { de_emojify(ctx.author) } in { ctx.channel } in { ctx.channel }')

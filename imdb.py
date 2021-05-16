@@ -10,24 +10,23 @@ class IMDB(commands.Cog):
     def __init__(self, bot, COMMAND_LOG):
         self.bot = bot
         self.command_id = COMMAND_LOG
-        self.enable = True
 
     def de_emojify(self, s):
         printable = set(string.printable)
         return ''.join(filter(lambda x: x in printable, str(s)))
 
-    @commands.command(name='imdb', help='Type _imdb "tv show or movie" to get the info of the movie or show', aliases=['IMDB'])
-    async def imdb(self, ctx, keyword=''):
+    @commands.command(name='imdb', brief='Gets the Info about the Movie or TV Series from IMDb', case_insensitive=True)
+    async def imdb(self, ctx, *, name=''):
         channel = self.bot.get_channel(int(self.command_id))
-        await channel.send(f'imdb command used by { self.de_emojify(ctx.author) }  for keyword { keyword } in { ctx.channel }')
+        await channel.send(f'imdb command used by { self.de_emojify(ctx.author) }  for name { name } in { ctx.channel }')
 
-        if keyword == '':
+        if name == '':
             response = 'Try again, but this time with a name!'
             await ctx.reply(response)
             return
 
-        keyword = keyword.replace(" ", "+")
-        url = f"https://www.imdb.com/find?q={ keyword }"
+        name = name.replace(" ", "+")
+        url = f"https://www.imdb.com/find?q={ name }"
         source = requests.get(url, timeout=20)
         soup = BeautifulSoup(source.text, 'lxml')
         td = soup.find('td', class_='result_text')
@@ -38,7 +37,7 @@ class IMDB(commands.Cog):
             return
 
         ttl = td.a['href']
-        keyword = keyword.replace("+", " ")
+        name = name.replace("+", " ")
         # Have reached the page of Title
         url = f"https://www.imdb.com{ttl}"
         source = requests.get(url, timeout=20)
@@ -53,7 +52,7 @@ class IMDB(commands.Cog):
         subtext = soup.find('div', class_='subtext')
 
         if subtext == None:
-            response = f'No such movie or tv show as { keyword }'
+            response = f'No such movie or tv show as { name }'
             await ctx.reply(response)
             return
 
