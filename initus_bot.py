@@ -67,6 +67,8 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         response = f"Slow it down bro! Try again in { int(error.retry_after) }s."
         await ctx.reply(response)
+    elif isinstance(error, commands.CommandNotFound):
+        pass
     else:
         channel = bot.get_channel(int(ERROR_LOG))
         await channel.send(error)

@@ -36,11 +36,17 @@ class IMDB(commands.Cog):
             await ctx.reply(response)
             return
 
+        headers = {
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36',
+            'referer': url,
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+        }
+
         ttl = td.a['href']
         name = name.replace("+", " ")
         # Have reached the page of Title
         url = f"https://www.imdb.com{ttl}"
-        source = requests.get(url, timeout=20)
+        source = requests.get(url, headers=headers, timeout=20)
         soup = BeautifulSoup(source.text, 'lxml')
 
         title = soup.find('div', class_='title_wrapper').h1.text.strip()
