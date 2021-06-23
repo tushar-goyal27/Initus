@@ -27,8 +27,8 @@ class IMDB(commands.Cog):
 
         name = name.replace(" ", "+")
         url = f"https://www.imdb.com/find?q={ name }"
-        source = requests.get(url, timeout=20)
-        soup = BeautifulSoup(source.text, 'lxml')
+        s1 = requests.get(url, timeout=20)
+        soup = BeautifulSoup(s1.text, 'lxml')
         td = soup.find('td', class_='result_text')
 
         if td == None:
@@ -46,7 +46,7 @@ class IMDB(commands.Cog):
         name = name.replace("+", " ")
         # Have reached the page of Title
         url = f"https://www.imdb.com{ttl}"
-        source = requests.get(url, headers=headers, timeout=20)
+        source = requests.get(url, headers=headers, timeout=20, cookies=s1.cookies)
         soup = BeautifulSoup(source.text, 'lxml')
 
         title = soup.find('div', class_='title_wrapper').h1.text.strip()
