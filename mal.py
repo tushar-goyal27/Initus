@@ -9,8 +9,8 @@ from datetime import date, datetime
 class MAL(commands.Cog):
     def __init__(self, bot, COMMAND_LOG, CHILL_LOUNGE):
         self.bot = bot
-        self.channel = self.bot.get_channel(int(COMMAND_LOG))
-        self.chill_lounge = self.bot.get_channel(int(CHILL_LOUNGE))
+        self.channel = COMMAND_LOG
+        self.chill_lounge = CHILL_LOUNGE
         self.enable = True
 
     def de_emojify(self, s):

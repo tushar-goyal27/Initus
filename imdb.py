@@ -9,7 +9,7 @@ from datetime import date, datetime
 class IMDB(commands.Cog):
     def __init__(self, bot, COMMAND_LOG):
         self.bot = bot
-        self.channel = self.bot.get_channel(int(COMMAND_LOG))
+        self.channel = COMMAND_LOG
 
     def de_emojify(self, s):
         printable = set(string.printable)

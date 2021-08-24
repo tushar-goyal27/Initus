@@ -3,9 +3,9 @@ from discord.ext import commands
 import json, string
 
 class LINK(commands.Cog):
-    def __init__(self, bot, guild_id):
+    def __init__(self, bot, GUILD):
         self.bot = bot
-        self.guild = self.bot.get_guild(int(guild_id))
+        self.guild = GUILD
         self.enable = True
 
     def de_emojify(self, s):
