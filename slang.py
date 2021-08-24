@@ -16,7 +16,7 @@ class SLANG(commands.Cog):
         return ''.join(filter(lambda x: x in printable, str(s)))
 
     @commands.command(name='slang', brief='Gives the meaning of the slang from UrbanDictionary', case_insensitive=True)
-    @commands.cooldown(1, 60, commands.BucketType.user)
+    @commands.cooldown(1, 40, commands.BucketType.channel)
     async def urbandictionary(self, ctx, *, keyword=''):
         channel = self.bot.get_channel(int(self.command_id))
         await channel.send(f'slang command used by { self.de_emojify(ctx.author) }  for keyword { keyword } in { ctx.channel }')
