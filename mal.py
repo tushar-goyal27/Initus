@@ -9,8 +9,8 @@ from datetime import date, datetime
 class MAL(commands.Cog):
     def __init__(self, bot, COMMAND_LOG, CHILL_LOUNGE):
         self.bot = bot
-        self.command_id = COMMAND_LOG
-        self.chill_lounge = CHILL_LOUNGE
+        self.channel = self.bot.get_channel(int(COMMAND_LOG))
+        self.chill_lounge = self.bot.get_channel(int(CHILL_LOUNGE))
         self.enable = True
 
     def de_emojify(self, s):
@@ -19,13 +19,12 @@ class MAL(commands.Cog):
 
     @commands.command(name='anime', brief='Gets the info of the anime from myanimelist', aliases=['mal'])
     async def anime(self, ctx, *, anime_name = ''):
-        if ctx.channel.id == int(self.chill_lounge):
+        if ctx.channel == self.chill_lounge:
             response = 'You can\'t use this command on this channel :('
             await ctx.reply(response)
             return
 
-        channel = self.bot.get_channel(int(self.command_id))
-        await channel.send(f'mal command used by { self.de_emojify(ctx.author) } for anime_name { anime_name } in { ctx.channel }')
+        await self.channel.send(f'mal command used by { self.de_emojify(ctx.author) } for anime_name { anime_name } in { ctx.channel }')
 
         if anime_name == '':
             response = 'Try again, but this time with a name!'
@@ -91,13 +90,12 @@ class MAL(commands.Cog):
 
     @commands.command(name = 'manga', brief='Gets the info of the manga from myanimelist', case_insensitive=True)
     async def manga(self, ctx, *, manga_name = ''):
-        if ctx.channel.id == int(self.chill_lounge):
+        if ctx.channel == self.chill_lounge:
             response = 'You can\'t use this command on this channel :('
             await ctx.reply(response)
             return
 
-        channel = self.bot.get_channel(int(self.command_id))
-        await channel.send(f'manga command used by { self.de_emojify(ctx.author) } for manga_name { manga_name } in { ctx.channel }')
+        await self.channel.send(f'manga command used by { self.de_emojify(ctx.author) } for manga_name { manga_name } in { ctx.channel }')
 
         if manga_name == '':
             response = 'Try again, but this time with a name!'

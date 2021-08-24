@@ -5,7 +5,7 @@ import json, string
 class LINK(commands.Cog):
     def __init__(self, bot, guild_id):
         self.bot = bot
-        self.GUILD_ID = guild_id
+        self.guild = self.bot.get_guild(int(guild_id))
         self.enable = True
 
     def de_emojify(self, s):
@@ -17,7 +17,7 @@ class LINK(commands.Cog):
 
         with open("links.json") as links_json:
             link_dict = json.load(links_json)
-            if ctx.guild.id == int(self.GUILD_ID):
+            if ctx.guild == self.guild:
                 keyword = keyword.upper()
                 if keyword in link_dict:
                     response = link_dict[keyword]

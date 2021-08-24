@@ -9,7 +9,7 @@ from datetime import date, datetime
 class SLANG(commands.Cog):
     def __init__(self, bot, COMMAND_LOG):
         self.bot = bot
-        self.command_id = COMMAND_LOG
+        self.channel = self.bot.get_channel(int(COMMAND_LOG))
 
     def de_emojify(self, s):
         printable = set(string.printable)
@@ -18,8 +18,7 @@ class SLANG(commands.Cog):
     @commands.command(name='slang', brief='Gives the meaning of the slang from UrbanDictionary')
     @commands.cooldown(1, 40, commands.BucketType.channel)
     async def urbandictionary(self, ctx, *, keyword=''):
-        channel = self.bot.get_channel(int(self.command_id))
-        await channel.send(f'slang command used by { self.de_emojify(ctx.author) }  for keyword { keyword } in { ctx.channel }')
+        await self.channel.send(f'slang command used by { self.de_emojify(ctx.author) }  for keyword { keyword } in { ctx.channel }')
 
         if keyword == '':
             # response = 'You haven\'t entered a word, so showing the meaning of dumb\n'

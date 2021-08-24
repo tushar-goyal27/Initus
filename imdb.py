@@ -9,7 +9,7 @@ from datetime import date, datetime
 class IMDB(commands.Cog):
     def __init__(self, bot, COMMAND_LOG):
         self.bot = bot
-        self.command_id = COMMAND_LOG
+        self.channel = self.bot.get_channel(int(COMMAND_LOG))
 
     def de_emojify(self, s):
         printable = set(string.printable)
@@ -17,8 +17,7 @@ class IMDB(commands.Cog):
 
     @commands.command(name='imdb', brief='Gets the Info about the Movie or TV Series from IMDb')
     async def imdb(self, ctx, *, name=''):
-        channel = self.bot.get_channel(int(self.command_id))
-        await channel.send(f'imdb command used by { self.de_emojify(ctx.author) }  for name { name } in { ctx.channel }')
+        await self.channel.send(f'imdb command used by { self.de_emojify(ctx.author) }  for name { name } in { ctx.channel }')
 
         if name == '':
             response = 'Try again, but this time with a name!'
