@@ -17,7 +17,7 @@ class MAL(commands.Cog):
         printable = set(string.printable)
         return ''.join(filter(lambda x: x in printable, str(s)))
 
-    @commands.command(name='anime', brief='Gets the info of the anime from myanimelist', aliases=['mal'], case_insensitive=True)
+    @commands.command(name='anime', brief='Gets the info of the anime from myanimelist', aliases=['mal'])
     async def anime(self, ctx, *, anime_name = ''):
         if ctx.channel.id == int(self.chill_lounge):
             response = 'You can\'t use this command on this channel :('

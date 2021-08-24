@@ -12,7 +12,7 @@ class LINK(commands.Cog):
         printable = set(string.printable)
         return ''.join(filter(lambda x: x in printable, str(s)))
 
-    @commands.command(name='link', help='Type _link Subject', aliases=['LINK', 'Link'])
+    @commands.command(name='link', help='Type _link Subject')
     async def link(self, ctx, keyword=''):
 
         with open("links.json") as links_json:

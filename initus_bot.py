@@ -35,7 +35,7 @@ ERROR_LOG = os.getenv('ERROR_LOG')
 
 intents = discord.Intents.all()
 
-bot = commands.Bot(command_prefix='_', intents = intents, help_command=None)
+bot = commands.Bot(command_prefix='_', intents = intents, help_command=None, case_insensitive=True)
 bot.launch_time = datetime.utcnow()
 
 mal_obj = MAL(bot, COMMAND_LOG, CHILL_LOUNGE)

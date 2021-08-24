@@ -15,7 +15,7 @@ class IMDB(commands.Cog):
         printable = set(string.printable)
         return ''.join(filter(lambda x: x in printable, str(s)))
 
-    @commands.command(name='imdb', brief='Gets the Info about the Movie or TV Series from IMDb', case_insensitive=True)
+    @commands.command(name='imdb', brief='Gets the Info about the Movie or TV Series from IMDb')
     async def imdb(self, ctx, *, name=''):
         channel = self.bot.get_channel(int(self.command_id))
         await channel.send(f'imdb command used by { self.de_emojify(ctx.author) }  for name { name } in { ctx.channel }')
