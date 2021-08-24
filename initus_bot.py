@@ -1,8 +1,4 @@
-import requests
-import random
 import string
-from bs4 import BeautifulSoup
-import csv
 from datetime import date, datetime
 import json
 
@@ -11,7 +7,6 @@ import os
 
 import discord
 from discord.ext import commands
-from discord.ext.commands import cooldown, BucketType
 
 from mal import MAL
 from imdb import IMDB
