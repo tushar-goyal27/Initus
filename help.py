@@ -4,7 +4,6 @@ from discord.ext import commands
 class HELP(commands.Cog):
     def __init__(self, bot, COMMAND_LOG):
         self.bot = bot
-        self.command_id = COMMAND_LOG
 
     @commands.command(name='help', brief='Shows this message')
     async def help(self, ctx, cmd=''):

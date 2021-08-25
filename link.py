@@ -3,21 +3,21 @@ from discord.ext import commands
 import json, string
 
 class LINK(commands.Cog):
-    def __init__(self, bot, guild_id):
+    def __init__(self, bot, GUILD):
         self.bot = bot
-        self.GUILD_ID = guild_id
+        self.guild = GUILD
         self.enable = True
 
     def de_emojify(self, s):
         printable = set(string.printable)
         return ''.join(filter(lambda x: x in printable, str(s)))
 
-    @commands.command(name='link', help='Type _link Subject', aliases=['LINK', 'Link'])
+    @commands.command(name='link', help='Type _link Subject')
     async def link(self, ctx, keyword=''):
 
         with open("links.json") as links_json:
             link_dict = json.load(links_json)
-            if ctx.guild.id == int(self.GUILD_ID):
+            if ctx.guild == self.guild:
                 keyword = keyword.upper()
                 if keyword in link_dict:
                     response = link_dict[keyword]

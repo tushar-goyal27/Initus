@@ -1,8 +1,4 @@
-import requests
-import random
 import string
-from bs4 import BeautifulSoup
-import csv
 from datetime import date, datetime
 import json
 
@@ -11,7 +7,6 @@ import os
 
 import discord
 from discord.ext import commands
-from discord.ext.commands import cooldown, BucketType
 
 from mal import MAL
 from imdb import IMDB
@@ -35,23 +30,21 @@ ERROR_LOG = os.getenv('ERROR_LOG')
 
 intents = discord.Intents.all()
 
-bot = commands.Bot(command_prefix='_', intents = intents, help_command=None)
+bot = commands.Bot(command_prefix='_', intents = intents, help_command=None, case_insensitive=True)
 bot.launch_time = datetime.utcnow()
-
-mal_obj = MAL(bot, COMMAND_LOG, CHILL_LOUNGE)
-imdb_obj = IMDB(bot, COMMAND_LOG)
-slang_obj = SLANG(bot, COMMAND_LOG)
-link_obj = LINK(bot, GUILD_ID)
-help_obj = HELP(bot, COMMAND_LOG)
-
-bot.add_cog(mal_obj)
-bot.add_cog(imdb_obj)
-bot.add_cog(slang_obj)
-bot.add_cog(link_obj)
-bot.add_cog(help_obj)
 
 @bot.event
 async def on_ready():
+    log = bot.get_channel(int(COMMAND_LOG))
+    lounge = bot.get_channel(int(CHILL_LOUNGE))
+    guild = bot.get_guild(int(GUILD_ID))
+
+    bot.add_cog(MAL(bot, log, lounge))
+    bot.add_cog(IMDB(bot, log))
+    bot.add_cog(SLANG(bot, log))
+    bot.add_cog(LINK(bot, guild))
+    bot.add_cog(HELP(bot, log))
+
     print(f'{bot.user} is connected\n')
     print('Currently on Servers:')
     for guild in bot.guilds:
