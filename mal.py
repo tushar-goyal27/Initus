@@ -1,10 +1,11 @@
-import discord
-from discord.ext import commands
-
-import requests
-from bs4 import BeautifulSoup
 import string
 from datetime import date, datetime
+
+import discord
+from discord.ext import commands
+import requests
+from bs4 import BeautifulSoup
+
 
 class MAL(commands.Cog):
     def __init__(self, bot, COMMAND_LOG, CHILL_LOUNGE):

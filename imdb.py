@@ -1,10 +1,10 @@
-import discord
-from discord.ext import commands
-
-import requests
-from bs4 import BeautifulSoup
 import string
 from datetime import date, datetime
+
+import discord
+from discord.ext import commands
+import requests
+from bs4 import BeautifulSoup
 
 class IMDB(commands.Cog):
     def __init__(self, bot, COMMAND_LOG):
@@ -42,6 +42,7 @@ class IMDB(commands.Cog):
         }
 
         ttl = td.a['href']
+        print(ttl)
         name = name.replace("+", " ")
         # Have reached the page of Title
         url = f"https://www.imdb.com{ttl}"

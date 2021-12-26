@@ -1,10 +1,10 @@
-import discord
-from discord.ext import commands
-
-import requests
-from bs4 import BeautifulSoup
 import string
 from datetime import date, datetime
+
+import discord
+from discord.ext import commands
+import requests
+from bs4 import BeautifulSoup
 
 class SLANG(commands.Cog):
     def __init__(self, bot, COMMAND_LOG):
@@ -16,7 +16,7 @@ class SLANG(commands.Cog):
         return ''.join(filter(lambda x: x in printable, str(s)))
 
     @commands.command(name='slang', brief='Gives the meaning of the slang from UrbanDictionary')
-    @commands.cooldown(1, 40, commands.BucketType.channel)
+    # @commands.cooldown(1, 40, commands.BucketType.channel)
     async def urbandictionary(self, ctx, *, keyword=''):
         await self.channel.send(f'slang command used by { self.de_emojify(ctx.author) }  for keyword { keyword } in { ctx.channel }')
 

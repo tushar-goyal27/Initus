@@ -1,32 +1,25 @@
 import string
 from datetime import date, datetime
 import json
-
-from dotenv import load_dotenv
 import os
 
 import discord
 from discord.ext import commands
+import config
 
 from mal import MAL
 from imdb import IMDB
 from slang import SLANG
-from link import LINK
 from help import HELP
 
 def de_emojify(s):
     printable = set(string.printable)
     return ''.join(filter(lambda x: x in printable, str(s)))
 
-load_dotenv()
-
-GUILD_ID = os.getenv('GUILD_ID')
-TOKEN = os.getenv('DISCORD_TOKEN')
-APIKEY = os.getenv('NEWS_API')
-CHANNEL = os.getenv('CHANNEL_ID')
-COMMAND_LOG = os.getenv('COMMAND_LOG_ID')
-CHILL_LOUNGE = os.getenv('CHILL_LOUNGE')
-ERROR_LOG = os.getenv('ERROR_LOG')
+TOKEN = config.DISCORD_TOKEN
+COMMAND_LOG = config.COMMAND_LOG
+CHILL_LOUNGE = config.CHILL_LOUNGE
+ERROR_LOG = config.ERROR_LOG
 
 intents = discord.Intents.all()
 
@@ -35,14 +28,12 @@ bot.launch_time = datetime.utcnow()
 
 @bot.event
 async def on_ready():
-    log = bot.get_channel(int(COMMAND_LOG))
-    lounge = bot.get_channel(int(CHILL_LOUNGE))
-    guild = bot.get_guild(int(GUILD_ID))
+    log = bot.get_channel(COMMAND_LOG)
+    lounge = bot.get_channel(CHILL_LOUNGE)
 
     bot.add_cog(MAL(bot, log, lounge))
     bot.add_cog(IMDB(bot, log))
     bot.add_cog(SLANG(bot, log))
-    bot.add_cog(LINK(bot, guild))
     bot.add_cog(HELP(bot, log))
 
     print(f'{bot.user} is connected\n')
@@ -50,10 +41,7 @@ async def on_ready():
     for guild in bot.guilds:
         print(guild.name)
 
-    channel = bot.get_channel(int(CHANNEL))
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f'_help'))
-    # await channel.send('The Bot is online')
-    # await channel.send('Initus Test time')
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f'_help in { len(bot.guilds) } servers'))
 
 @bot.event
 async def on_command_error(ctx, error):
